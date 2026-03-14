@@ -1,0 +1,25 @@
+{
+  "name": "@mcp-sentinel/evidence",
+  "version": "1.0.0",
+  "description": "Evidence store — persistence, attestations, search, analytics, audit log",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "node dist/server.js",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@mcp-sentinel/core": "*",
+    "better-sqlite3": "^11.0.0",
+    "express": "^4.18.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0",
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/express": "^4.17.0",
+    "@types/cors": "^2.8.0"
+  }
+}

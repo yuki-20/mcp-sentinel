@@ -1,0 +1,20 @@
+{
+  "name": "@mcp-sentinel/collector",
+  "version": "1.0.0",
+  "description": "Discovery & asset graph — config parsers, registry sync, watchers",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@mcp-sentinel/core": "*",
+    "chokidar": "^3.6.0",
+    "glob": "^10.3.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0"
+  }
+}

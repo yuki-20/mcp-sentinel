@@ -1,0 +1,29 @@
+{
+  "name": "@mcp-sentinel/cli",
+  "version": "1.0.0",
+  "description": "CLI interface — scan, discover, analyze, detonate, policy, evidence",
+  "main": "dist/index.js",
+  "bin": {
+    "sentinel": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test dist/**/*.test.js"
+  },
+  "dependencies": {
+    "@mcp-sentinel/core": "*",
+    "@mcp-sentinel/collector": "*",
+    "@mcp-sentinel/scanner": "*",
+    "@mcp-sentinel/runner": "*",
+    "@mcp-sentinel/policy": "*",
+    "@mcp-sentinel/evidence": "*",
+    "chalk": "^4.1.2",
+    "cli-table3": "^0.6.3",
+    "commander": "^12.0.0",
+    "ora": "^5.4.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/node": "^20.0.0"
+  }
+}
