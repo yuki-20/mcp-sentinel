@@ -5,7 +5,7 @@
 
 import {
   Server, Finding, Severity, FindingStatus, DetectorFamily,
-  TransportType, AuthPosture, createId, createTimestamp,
+  TransportType, createId, createTimestamp,
 } from '@mcp-sentinel/core';
 
 // ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ export class SecretScanner implements Detector {
     // Check environment variables in server config
     if (ctx.server.env) {
       for (const [key, value] of Object.entries(ctx.server.env)) {
-        searchTargets.push({ label: `env.${key}`, content: value });
+        searchTargets.push({ label: `env.${key}`, content: value as string });
       }
     }
 
@@ -404,7 +404,7 @@ export class CapabilitySurfaceAnalyzer implements Detector {
 
     // Check for write/destructive capabilities in tool names/descriptions
     const destructiveKeywords = ['delete', 'remove', 'drop', 'truncate', 'destroy', 'purge', 'wipe', 'reset', 'format', 'kill'];
-    const writeKeywords = ['write', 'create', 'insert', 'update', 'modify', 'put', 'post', 'send', 'publish', 'deploy', 'execute', 'run'];
+    const _writeKeywords = ['write', 'create', 'insert', 'update', 'modify', 'put', 'post', 'send', 'publish', 'deploy', 'execute', 'run'];
 
     const serverName = ctx.server.name.toLowerCase();
     const commandStr = `${ctx.server.command} ${(ctx.server.args || []).join(' ')}`.toLowerCase();
@@ -711,7 +711,7 @@ export class ToolPoisoningDetector implements Detector {
     const prev = ctx.previousVersion;
 
     // Check for changed descriptions
-    if (prev.descriptions && prev.changedDescriptions) {
+    if (prev.descriptions && Object.keys(prev.descriptions).length > 0) {
       // This would be populated by the version diffing engine
     }
 
@@ -900,7 +900,7 @@ export class VersionDriftDetector implements Detector {
 
     const prev = ctx.previousVersion;
     const rawConfig = (ctx.server.metadata?.rawConfig as any) || {};
-    const currentTools = rawConfig.tools || [];
+    const _currentTools = rawConfig.tools || [];
     const currentEnvVars = Object.keys(ctx.server.env || {});
 
     // Check for new env vars (may indicate new credential requirements)

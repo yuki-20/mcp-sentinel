@@ -4,7 +4,7 @@
 // ============================================================================
 
 import {
-  Server, Finding, Policy, PolicyRule, PolicyCondition,
+  Server, Finding, Policy, PolicyCondition,
   PolicyDecision, DecisionVerdict, Severity, Waiver,
   createId, createTimestamp,
 } from '@mcp-sentinel/core';
@@ -123,10 +123,10 @@ export class PolicyEngine {
 
     // Handle AND/OR compound conditions
     if (condition.and) {
-      match = match && condition.and.every(c => this.evaluateCondition(c, server, finding));
+      match = match && condition.and.every((c: PolicyCondition) => this.evaluateCondition(c, server, finding));
     }
     if (condition.or) {
-      match = match || condition.or.some(c => this.evaluateCondition(c, server, finding));
+      match = match || condition.or.some((c: PolicyCondition) => this.evaluateCondition(c, server, finding));
     }
 
     return match;

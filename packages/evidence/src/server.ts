@@ -6,9 +6,9 @@
 import express from 'express';
 import cors from 'cors';
 import { SentinelDB } from '@mcp-sentinel/core';
-import type { Finding, Server, Policy, ScanResult } from '@mcp-sentinel/core';
+import type { Finding } from '@mcp-sentinel/core';
 
-export function createEvidenceServer(db: SentinelDB, port: number = 3001): express.Express {
+export function createEvidenceServer(db: SentinelDB, _port: number = 3001): express.Express {
   const app = express();
   app.use(cors());
   app.use(express.json({ limit: '50mb' }));

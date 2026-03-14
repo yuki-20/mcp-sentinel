@@ -309,6 +309,21 @@ export class SentinelDB {
   // ---------------------------------------------------------------------------
 
   upsertServer(server: Server): void {
+    // Auto-create client record if clientId is provided but doesn't exist
+    if (server.clientId) {
+      const existingClient = this.db.prepare('SELECT id FROM clients WHERE id = ?').get(server.clientId);
+      if (!existingClient) {
+        this.db.prepare(`
+          INSERT OR IGNORE INTO clients (id, host_id, type, name, version, config_path, discovered_at, last_seen_at)
+          VALUES (@id, NULL, 'auto-discovered', @name, NULL, 'unknown', @discoveredAt, @discoveredAt)
+        `).run({
+          id: server.clientId,
+          name: server.clientId,
+          discoveredAt: server.discoveredAt,
+        });
+      }
+    }
+
     const stmt = this.db.prepare(`
       INSERT INTO servers (id, name, command, args, env, transport, url, client_id, discovered_at, last_scanned_at, approval_status, risk_score, metadata)
       VALUES (@id, @name, @command, @args, @env, @transport, @url, @clientId, @discoveredAt, @lastScannedAt, @approvalStatus, @riskScore, @metadata)
@@ -321,7 +336,7 @@ export class SentinelDB {
       ...server,
       args: JSON.stringify(server.args),
       env: JSON.stringify(server.env),
-      clientId: server.clientId,
+      clientId: server.clientId || null,
       discoveredAt: server.discoveredAt,
       lastScannedAt: server.lastScannedAt || null,
       approvalStatus: server.approvalStatus,

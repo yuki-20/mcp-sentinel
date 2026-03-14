@@ -9,16 +9,16 @@ import chalk from 'chalk';
 import Table from 'cli-table3';
 import ora from 'ora';
 import * as fs from 'fs';
-import * as path from 'path';
 import {
-  SentinelDB, ScanResult, Severity, FindingStatus,
+  SentinelDB, ScanResult, Server, Finding,
   createId, createTimestamp, buildScanSummary, formatJSON,
   formatSARIF, formatText,
 } from '@mcp-sentinel/core';
-import { discoverAllClients, ClaudeDesktopParser, CursorParser, VSCodeParser, ClaudeCodeParser } from '@mcp-sentinel/collector';
+import { discoverAllClients } from '@mcp-sentinel/collector';
 import { ScannerEngine } from '@mcp-sentinel/scanner';
 import type { DetectorContext } from '@mcp-sentinel/scanner';
 import { PolicyEngine, getAllPolicyBundles } from '@mcp-sentinel/policy';
+import type { Policy } from '@mcp-sentinel/core';
 import { DetonationScheduler } from '@mcp-sentinel/runner';
 
 const program = new Command();
@@ -89,7 +89,7 @@ program
       const customPaths = opts.path ? [opts.path] : undefined;
       const parseResults = discoverAllClients(customPaths);
 
-      const allServers = parseResults.flatMap(r => r.servers);
+      const allServers: Server[] = parseResults.flatMap((r: any) => r.servers);
       spinner.succeed(`Found ${allServers.length} MCP server(s) across ${parseResults.length} client(s)`);
 
       if (allServers.length === 0) {
@@ -135,7 +135,8 @@ program
       const policySpinner = ora('Evaluating policies...').start();
       const policyEngine = new PolicyEngine();
       const bundles = getAllPolicyBundles();
-      const selectedBundle = bundles.find(b => b.bundle === opts.policy) || bundles[1];
+      const selectedBundle = bundles.find((b: Policy) => b.bundle === opts.policy) || bundles[1];
+      db.upsertPolicy(selectedBundle);  // Store policy in DB for FK constraint
       policyEngine.loadPolicies([selectedBundle]);
 
       let totalDecisions = 0;
@@ -248,7 +249,7 @@ program
         console.log(table.toString());
       }
 
-      const totalServers = parseResults.reduce((sum, r) => sum + r.servers.length, 0);
+      const totalServers = parseResults.reduce((sum: number, r: any) => sum + r.servers.length, 0);
       console.log(chalk.bold.green(`\n  Total: ${totalServers} server(s) across ${parseResults.length} client(s)\n`));
     } catch (e: any) {
       spinner.fail(`Discovery failed: ${e.message}`);
@@ -263,7 +264,7 @@ program
   .command('analyze <config>')
   .description('Deep analysis of a specific MCP server config file')
   .option('--verbose', 'Show all details')
-  .action(async (configPath, opts) => {
+  .action(async (configPath, _opts) => {
     printBanner();
     const spinner = ora(`Analyzing ${configPath}...`).start();
 
@@ -274,7 +275,7 @@ program
       }
 
       const content = fs.readFileSync(configPath, 'utf-8');
-      const config = JSON.parse(content);
+      const _config = JSON.parse(content);
       const { GenericParser } = require('@mcp-sentinel/collector');
       const parser = new GenericParser();
       const result = parser.parse(configPath);
@@ -324,7 +325,7 @@ program
     const spinner = ora('Preparing detonation sandbox...').start();
 
     try {
-      const content = fs.readFileSync(configPath, 'utf-8');
+      const _content = fs.readFileSync(configPath, 'utf-8');
       const { GenericParser } = require('@mcp-sentinel/collector');
       const parser = new GenericParser();
       const result = parser.parse(configPath);
@@ -339,7 +340,7 @@ program
       for (const server of result.servers) {
         spinner.text = `Detonating: ${server.name}...`;
 
-        const jobId = scheduler.enqueue({
+        const _jobId = scheduler.enqueue({
           serverId: server.id,
           serverConfig: server,
           options: {
@@ -430,7 +431,7 @@ program
       const db = new SentinelDB();
       const servers = db.getAllServers();
       const bundles = getAllPolicyBundles();
-      const selectedBundle = bundles.find(b => b.bundle === opts.bundle) || bundles[1];
+      const selectedBundle = bundles.find((b: Policy) => b.bundle === opts.bundle) || bundles[1];
 
       const engine = new PolicyEngine(opts.dryRun);
       engine.loadPolicies([selectedBundle]);
@@ -560,7 +561,7 @@ program
   .description('Generate a comprehensive posture report')
   .option('-f, --format <format>', 'Format: text, json, sarif', 'text')
   .option('-o, --output <file>', 'Output file')
-  .action(async (opts) => {
+  .action(async (_opts) => {
     printBanner();
     const spinner = ora('Generating posture report...').start();
 
@@ -569,7 +570,7 @@ program
       const stats = db.getStats();
       const findings = db.getAllFindings();
       const servers = db.getAllServers();
-      const scans = db.getScanHistory(5);
+      const _scans = db.getScanHistory(5);
 
       spinner.succeed('Report generated');
 
@@ -594,7 +595,7 @@ program
           style: { head: ['cyan'] },
         });
         for (const s of servers) {
-          const serverFindings = findings.filter(f => f.serverId === s.id);
+          const serverFindings = findings.filter((f: Finding) => f.serverId === s.id);
           table.push([
             s.name,
             s.transport,
