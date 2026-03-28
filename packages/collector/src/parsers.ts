@@ -313,14 +313,22 @@ export class ClaudeCodeParser extends ConfigParser {
   protected extractServers(config: any, clientId: string, configPath: string): Server[] {
     const servers: Server[] = [];
 
-    // Claude Code can have servers at root level or nested
-    const mcpServers = config.mcpServers || config.servers || config;
+    // Claude Code stores MCP servers under mcpServers or servers key
+    // When falling back to root config, only pick entries that look like MCP servers
+    const mcpServers = config.mcpServers || config.servers || null;
 
-    if (typeof mcpServers !== 'object') return servers;
+    // If no dedicated key found, scan root-level entries but require command/url
+    const candidates = mcpServers || config;
 
-    for (const [name, cfg] of Object.entries(mcpServers)) {
+    if (typeof candidates !== 'object') return servers;
+
+    for (const [name, cfg] of Object.entries(candidates)) {
       const serverConfig = cfg as any;
       if (typeof serverConfig !== 'object') continue;
+
+      // Only treat entries with a command or url as MCP servers
+      // This prevents picking up non-MCP data (projects, oauthAccount, etc.)
+      if (!mcpServers && !serverConfig.command && !serverConfig.url) continue;
 
       servers.push({
         id: createId(),
